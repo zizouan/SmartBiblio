@@ -1,0 +1,352 @@
+{
+  "info": {
+    "name": "BiblioSmart API Local",
+    "description": "Run requests top-to-bottom. If login fails, create admin first via tinker: php artisan tinker --execute \"use App\\Models\\User; use Illuminate\\Support\\Facades\\Hash; use Illuminate\\Support\\Str; User::updateOrCreate(['email'=>'admin@biblio.test'],['first_name'=>'Admin','last_name'=>'Root','password_hash'=>Hash::make('Admin123!'),'role'=>'admin','is_active'=>true,'qr_code'=>'MEM-'.Str::uuid()]);\"",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "0 - Health",
+      "item": [
+        {
+          "name": "GET Root",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": ["{{baseUrl}}"],
+              "path": [""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "1 - Auth",
+      "item": [
+        {
+          "name": "POST Login Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('access_token', json.data.tokens.access_token);",
+                  "pm.collectionVariables.set('refresh_token', json.data.tokens.refresh_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{admin_email}}\",\n  \"password\": \"{{admin_password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "GET Me",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "auth", "me"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2 - Seed Core Data",
+      "item": [
+        {
+          "name": "POST Create Member (Reader)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', function () { pm.response.to.have.status(201); });",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('member_id', json.data.id);",
+                  "pm.collectionVariables.set('member_qr', json.data.qr_code);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{member_email}}\",\n  \"password\": \"{{member_password}}\",\n  \"first_name\": \"Reader\",\n  \"last_name\": \"One\",\n  \"role\": \"reader\",\n  \"is_active\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/members",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "members"]
+            }
+          }
+        },
+        {
+          "name": "POST Create Author",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', function () { pm.response.to.have.status(201); });",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('author_id', json.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Victor\",\n  \"last_name\": \"Hugo\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/authors",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "authors"]
+            }
+          }
+        },
+        {
+          "name": "POST Create Genre",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', function () { pm.response.to.have.status(201); });",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('genre_id', json.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Roman\",\n  \"slug\": \"roman-{{run_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/genres",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "genres"]
+            }
+          }
+        },
+        {
+          "name": "POST Create Book",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', function () { pm.response.to.have.status(201); });",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('book_id', json.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isbn\": \"9781234567{{run_short}}\",\n  \"title\": \"Les Miserables {{run_id}}\",\n  \"language\": \"fr\",\n  \"total_copies\": 1,\n  \"available_copies\": 1,\n  \"author_ids\": [\"{{author_id}}\"],\n  \"genre_ids\": [\"{{genre_id}}\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/books",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "books"]
+            }
+          }
+        },
+        {
+          "name": "POST Create Book Copy",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', function () { pm.response.to.have.status(201); });",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('book_copy_id', json.data.id);",
+                  "pm.collectionVariables.set('book_copy_qr', json.data.qr_code);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"book_id\": \"{{book_id}}\",\n  \"condition\": \"good\",\n  \"shelf_location\": \"A-01\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/book-copies",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "book-copies"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3 - Loans",
+      "item": [
+        {
+          "name": "POST Create Loan (Assisted)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201', function () { pm.response.to.have.status(201); });",
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('loan_id', json.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{member_id}}\",\n  \"book_copy_id\": \"{{book_copy_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/loans",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "loans"]
+            }
+          }
+        },
+        {
+          "name": "POST Return Loan",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/loans/{{loan_id}}/return",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "loans", "{{loan_id}}", "return"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4 - Search & Lists",
+      "item": [
+        {
+          "name": "GET Search Books",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/search/books?title=Les&language=fr&available_only=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "search", "books"],
+              "query": [
+                { "key": "title", "value": "Les" },
+                { "key": "language", "value": "fr" },
+                { "key": "available_only", "value": "1" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Members",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{access_token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/members",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "members"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://127.0.0.1:8000" },
+    { "key": "admin_email", "value": "admin@biblio.test" },
+    { "key": "admin_password", "value": "Admin123!" },
+    { "key": "member_email", "value": "reader1@biblio.test" },
+    { "key": "member_password", "value": "Reader123!" },
+    { "key": "run_id", "value": "001" },
+    { "key": "run_short", "value": "001" },
+    { "key": "access_token", "value": "" },
+    { "key": "refresh_token", "value": "" },
+    { "key": "member_id", "value": "" },
+    { "key": "member_qr", "value": "" },
+    { "key": "author_id", "value": "" },
+    { "key": "genre_id", "value": "" },
+    { "key": "book_id", "value": "" },
+    { "key": "book_copy_id", "value": "" },
+    { "key": "book_copy_qr", "value": "" },
+    { "key": "loan_id", "value": "" }
+  ]
+}
