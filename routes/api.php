@@ -26,7 +26,12 @@ Route::prefix('v1')->group(function () {
     });
 
     Route::middleware(['auth.jwt'])->group(function () {
-        Route::get('/search/books', [SearchController::class, 'books']);
+        Route::prefix('search')->group(function () {
+            Route::get('/books', [SearchController::class, 'books']);
+            Route::get('/users', [SearchController::class, 'users']);
+            Route::get('/book-copies', [SearchController::class, 'bookCopies']);
+            Route::get('/book-copies-by-book/{bookId}', [SearchController::class, 'bookCopiesByBookId']);
+        });
 
         Route::get('/members/profile', [MemberController::class, 'profile']);
         Route::get('/members/{member}/history', [MemberController::class, 'history']);
