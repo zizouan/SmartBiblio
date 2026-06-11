@@ -22,15 +22,20 @@ class LoanController extends Controller
 
     public function index(Request $request): JsonResponse
     {
+        $user = Auth::user();
         $perPage = (int) $request->integer('per_page', 15);
 
         $query = Loan::query()->with(['user', 'bookCopy.book']);
+
+        if ($user && $user->role === UserRole::Reader) {
+            $query->where('user_id', $user->id);
+        }
 
         if ($request->filled('status')) {
             $query->where('status', $request->string('status')->toString());
         }
 
-        if ($request->filled('user_id')) {
+        if ($request->filled('user_id') && $user?->role !== UserRole::Reader) {
             $query->where('user_id', $request->string('user_id')->toString());
         }
 
